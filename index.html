@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tirage au sort de la map</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .map-container { margin: 20px; }
+        .map { font-size: 24px; margin: 10px; }
+        .selected-map { font-weight: bold; color: red; font-size: 28px; }
+        .history, .stats { margin-top: 20px; text-align: left; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>Tirage au sort de la map</h1>
+    <div class="map-container">
+        <div class="map" id="skeld">The Skeld: <span class="percentage">20%</span></div>
+        <div class="map" id="polus">Polus: <span class="percentage">20%</span></div>
+        <div class="map" id="mira">Mira HQ: <span class="percentage">20%</span></div>
+        <div class="map" id="airship">The Airship: <span class="percentage">20%</span></div>
+        <div class="map" id="fungle">Fungle: <span class="percentage">20%</span></div>
+    </div>
+    <button onclick="tirerAuSort()">Tirage au sort de la map</button>
+    <button onclick="afficherHistorique()">Historique des tirages</button>
+    <button onclick="afficherStatistiques()">Statistiques des tirages</button>
+    <h2 id="resultat"></h2>
+    
+    <div id="historique" class="history"></div>
+    <div id="statistiques" class="stats"></div>
+
+    <script>
+        let maps = [
+            { name: "The Skled", id: "skeld", percentage: 20, count: 0 },
+            { name: "Polus", id: "polus", percentage: 20, count: 0 },
+            { name: "Mira HQ", id: "mira", percentage: 20, count: 0 },
+            { name: "The Airship", id: "airship", percentage: 20, count: 0 },
+            { name: "Fungle", id: "fungle", percentage: 20, count: 0 }
+        ];
+        let historique = [];
+
+        function tirerAuSort() {
+            let total = 100;
+            let rand = Math.random() * total;
+            let cumulative = 0;
+            let selectedMap = null;
+
+            for (let map of maps) {
+                cumulative += map.percentage;
+                if (rand < cumulative) {
+                    selectedMap = map;
+                    break;
+                }
+            }
+            
+            selectedMap.count++;
+            let now = new Date().toLocaleTimeString();
+            historique.unshift(`${now} - ${selectedMap.name}`);
+            document.getElementById("resultat").innerHTML = `Map sélectionnée: <span class='selected-map'>${selectedMap.name}</span>`;
+            
+            let redistribution = selectedMap.percentage / 4;
+            selectedMap.percentage = 0;
+
+            for (let map of maps) {
+                if (map !== selectedMap) {
+                    map.percentage += redistribution;
+                }
+            }
+            
+            for (let map of maps) {
+                document.querySelector(`#${map.id} .percentage`).textContent = `${map.percentage.toFixed(2)}%`;
+            }
+        }
+
+        function afficherHistorique() {
+            let histoDiv = document.getElementById("historique");
+            histoDiv.innerHTML = "<h3>Historique des tirages :</h3>" + historique.join("<br>");
+        }
+
+        function afficherStatistiques() {
+            let statsDiv = document.getElementById("statistiques");
+            statsDiv.innerHTML = "<h3>Statistiques des tirages :</h3>" + 
+                maps.map(map => `${map.name}: ${map.count} fois`).join("<br>");
+        }
+    </script>
+</body>
+</html>
